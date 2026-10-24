@@ -1,0 +1,13 @@
+{
+  "name": "gsat-math-tutor-web",
+  "version": "1.0.0",
+  "description": "101 數學家教系統 (GSAT Math Tutor) - Netlify 網頁版",
+  "main": "local_server.js",
+  "scripts": {
+    "start": "node local_server.js",
+    "dev": "node local_server.js"
+  },
+  "keywords": ["math", "tutor", "gemini", "gsat", "netlify"],
+  "author": "",
+  "license": "MIT"
+}
