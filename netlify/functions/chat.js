@@ -108,7 +108,12 @@ exports.handler = async function (event, context) {
       }
 
       if (parts.length > 0) {
-        contents.push({ role, parts });
+        // 若連續兩則都是相同的角色 (例如使用者重試)，合併在同一個 turn 中以符合 Gemini API 規範
+        if (contents.length > 0 && contents[contents.length - 1].role === role) {
+          contents[contents.length - 1].parts.push(...parts);
+        } else {
+          contents.push({ role, parts });
+        }
       }
     }
 
@@ -172,6 +177,11 @@ exports.handler = async function (event, context) {
       } catch (e) {
         errMsg = errText;
       }
+
+      if (response.status === 504) {
+        errMsg = 'Google 伺服器運算逾時 (504 Gateway Timeout)，通常是因剛才的原始相片檔案過大或雲端瞬間高乘載。系統現已自動完成相片輕量化壓縮，請點擊「重置對話」後重新上傳即可秒速解題！';
+      }
+
       return {
         statusCode: response.status,
         headers,

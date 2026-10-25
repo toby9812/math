@@ -157,18 +157,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const reader = new FileReader();
     reader.onload = (event) => {
-      const base64Data = event.target.result.split(',')[1];
-      currentImage = {
-        data: base64Data,
-        mimeType: file.type,
-        fileName: file.name || '貼上的截圖.png',
-        dataUrl: event.target.result
-      };
+      const img = new Image();
+      img.onload = () => {
+        // 等比例壓縮圖片（最長邊 1600px），避免巨型相片造成上傳過大與 504 逾時
+        const MAX_DIM = 1600;
+        let width = img.width;
+        let height = img.height;
 
-      previewImage.src = currentImage.dataUrl;
-      previewFileName.textContent = currentImage.fileName;
-      imagePreviewBar.style.display = 'flex';
-      chatInput.focus();
+        if (width > MAX_DIM || height > MAX_DIM) {
+          if (width > height) {
+            height = Math.round((height * MAX_DIM) / width);
+            width = MAX_DIM;
+          } else {
+            width = Math.round((width * MAX_DIM) / height);
+            height = MAX_DIM;
+          }
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        const base64Data = compressedDataUrl.split(',')[1];
+
+        currentImage = {
+          data: base64Data,
+          mimeType: 'image/jpeg',
+          fileName: file.name || '題目截圖.jpg',
+          dataUrl: compressedDataUrl
+        };
+
+        previewImage.src = currentImage.dataUrl;
+        previewFileName.textContent = currentImage.fileName;
+        imagePreviewBar.style.display = 'flex';
+        chatInput.focus();
+      };
+      img.src = event.target.result;
     };
     reader.readAsDataURL(file);
   }

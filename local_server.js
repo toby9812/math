@@ -35,7 +35,10 @@ const server = http.createServer(async (req, res) => {
           body: body
         };
 
-        const result = await chatFunction.handler(event, {});
+        // 清除快取，確保本地熱重載每次都執行最新程式碼
+        delete require.cache[require.resolve('./netlify/functions/chat.js')];
+        const freshChatFunction = require('./netlify/functions/chat.js');
+        const result = await freshChatFunction.handler(event, {});
 
         res.writeHead(result.statusCode || 200, result.headers || {});
         res.end(result.body || '');
