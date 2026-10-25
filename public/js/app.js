@@ -50,7 +50,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // 初始化設定讀取
   function initConfig() {
     const savedApiKey = localStorage.getItem('gemini_api_key') || '';
-    const savedModel = localStorage.getItem('gemini_model') || 'gemini-3.8-flash';
+    let savedModel = localStorage.getItem('gemini_model') || 'gemini-3.8-flash';
+
+    // 若瀏覽器先前記住了已停止向新用戶開放的舊版模型，自動升級為最新的 3.8
+    if (savedModel === 'gemini-2.5-flash' || savedModel === 'gemini-1.5-pro') {
+      savedModel = 'gemini-3.8-flash';
+      localStorage.setItem('gemini_model', 'gemini-3.8-flash');
+    }
 
     inputApiKey.value = savedApiKey;
     
